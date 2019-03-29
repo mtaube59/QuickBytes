@@ -40,6 +40,7 @@ function insertRow(place) {
     var latitude = place.latitude;
     var longitude = place.longitude;
     var drive_time = place.drive_time;
+    var walk_time = place.walk_time;
 
     // Create the new row
     var newRow = $("<tr>").append(
@@ -48,7 +49,8 @@ function insertRow(place) {
         $("<td>").text(votes),
         $("<td>").text(latitude),
         $("<td>").text(longitude),
-        $("<td>").text(drive_time)
+        $("<td>").text(drive_time),
+        $("<td>").text(walk_time)
     );
 
     // Append the new row to the table

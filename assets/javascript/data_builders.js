@@ -10,7 +10,8 @@ function getRestaurantData(lat, lon, radius_meters) {
         "&lat=" + lat +
         "&lon=" + lon +
         "&radius=" + radius_meters +
-        "&sort=real_distance&order=asc";
+        "&sort=real_distance&order=asc" + 
+        "&start=" + ZOMATO_START;
 
     restaurantData.lat = lat;
     restaurantData.lon = lon;
@@ -64,6 +65,12 @@ function getRestaurantData(lat, lon, radius_meters) {
 
                 // Call traffic data for this location.
                 getTrafficData(restaurantData.lat,
+                    restaurantData.lon,
+                    place.latitude,
+                    place.longitude);
+
+                // Call walking data for this location.
+                getWalkData(restaurantData.lat,
                     restaurantData.lon,
                     place.latitude,
                     place.longitude);
@@ -122,16 +129,70 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
                 }
             }
 
-            // Set the done flag if possible.
-            if (restaurantData.num_commute_data_retrieved == restaurantData.results.length)
-            {
-                restaurantData.commute_data_done = true;
-            }
+            // NOTE : Either drive or walk results could return first, so put the check in both places.
 
-            if ( restaurantData.commute_data_done === true ) {
+            // Set the done flag if possible.
+            if (restaurantData.num_commute_data_retrieved == (2 * restaurantData.results.length)) {
+                restaurantData.commute_data_done = true;
                 // Update data to the table.
                 updateTable();
             }
+
+        }
+    });
+}
+
+function getWalkData(from_lat, from_lon, to_lat, to_lon) {
+
+    var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
+        "key=" + MAPQUEST_API_KEY +
+        "&from=" + from_lat + "," + from_lon +
+        "&to=" + to_lat + "," + to_lon +
+        "&routeType=pedestrian";
+
+    console.log(queryURL);
+
+    $.ajax({
+        url: queryURL,
+        dataType: 'json',
+        async: true,
+        success: function (response) {
+            console.log("WALK DATA : ");
+            console.log(response);
+
+            console.log(response.route.locations[1].latLng);
+            var lat = 1000000 * response.route.locations[1].latLng.lat;
+            var lon = 1000000 * response.route.locations[1].latLng.lng;
+
+            console.log("response lat " + lat);
+            console.log("response lon " + lon);
+
+            var walk_time = response.route.formattedTime;
+            console.log("walk_time = " + walk_time);
+
+            // Search for matching place location entry.
+            for (var i = 0; i < restaurantData.results.length; i++) {
+                var place = restaurantData.results[i];
+                var target_lat = Math.round(place.latitude * 1000000);
+                var target_lon = Math.round(place.longitude * 1000000);
+
+                if ((lat == target_lat) && (lon == target_lon)) {
+                    console.log("Found at index " + i);
+                    restaurantData.results[i].walk_time = walk_time;
+                    restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
+                    break; // Out of for loop.
+                }
+            }
+
+            // NOTE : Either drive or walk results could return first, so put the check in both places.
+
+            // Set the done flag if possible.
+            if (restaurantData.num_commute_data_retrieved == (2 * restaurantData.results.length)) {
+                restaurantData.commute_data_done = true;
+                // Update data to the table.
+                updateTable();
+            }
+
         }
     });
 }
