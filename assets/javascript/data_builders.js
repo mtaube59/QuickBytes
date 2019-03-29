@@ -12,6 +12,10 @@ function getRestaurantData(lat, lon, radius_meters) {
         "&radius=" + radius_meters +
         "&sort=real_distance&order=asc";
 
+    restaurantData.lat = lat;
+    restaurantData.lon = lon;
+    restaurantData.radius_meters = radius_meters;
+
     $.ajax({
         url: zomatoQueryURL,
         dataType: 'json',
@@ -57,6 +61,12 @@ function getRestaurantData(lat, lon, radius_meters) {
 
                 // Push to the end of the restaurantData.results array.
                 restaurantData.results.push(place);
+
+                // Call traffic data for this location.
+                getTrafficData(restaurantData.lat,
+                    restaurantData.lon,
+                    place.latitude,
+                    place.longitude);
             }
 
             // Indicate that restaurant data has been filled.
@@ -65,7 +75,7 @@ function getRestaurantData(lat, lon, radius_meters) {
             console.log(restaurantData);
 
             // Update data to the table.
-            updateTable();
+            //updateTable();
 
         }
     });
@@ -73,5 +83,56 @@ function getRestaurantData(lat, lon, radius_meters) {
 
 function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
 
+    var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
+        "key=" + MAPQUEST_API_KEY +
+        "&from=" + from_lat + "," + from_lon +
+        "&to=" + to_lat + "," + to_lon;
+
+    console.log(queryURL);
+
+    $.ajax({
+        url: queryURL,
+        dataType: 'json',
+        async: true,
+        success: function (response) {
+            console.log("TRAFFIC DATA : ");
+            console.log(response);
+
+            console.log(response.route.locations[1].latLng);
+            var lat = 1000000 * response.route.locations[1].latLng.lat;
+            var lon = 1000000 * response.route.locations[1].latLng.lng;
+
+            console.log("response lat " + lat);
+            console.log("response lon " + lon);
+
+            var drive_time = response.route.formattedTime;
+            console.log("drive_time = " + drive_time);
+
+            // Search for matching place location entry.
+            for (var i = 0; i < restaurantData.results.length; i++) {
+                var place = restaurantData.results[i];
+                var target_lat = Math.round(place.latitude * 1000000);
+                var target_lon = Math.round(place.longitude * 1000000);
+
+                if ((lat == target_lat) && (lon == target_lon)) {
+                    console.log("Found at index " + i);
+                    restaurantData.results[i].drive_time = drive_time;
+                    restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
+                    break; // Out of for loop.
+                }
+            }
+
+            // Set the done flag if possible.
+            if (restaurantData.num_commute_data_retrieved == restaurantData.results.length)
+            {
+                restaurantData.commute_data_done = true;
+            }
+
+            if ( restaurantData.commute_data_done === true ) {
+                // Update data to the table.
+                updateTable();
+            }
+        }
+    });
 }
 

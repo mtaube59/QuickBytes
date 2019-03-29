@@ -11,6 +11,9 @@ var TABLE_DATA = []; // Array of data objects.
 
 // Object to hold our data.
 var restaurantData = {
+    lat: -1, // Lat/Lon of origin
+    lon: -1,
+    radius_meters: -1, // Search radius
     place_data_done: false,  // Do we have all the restaurant place data?
     commute_data_done: false, // Do we have all the commute data?
     num_commute_data_retrieved: -1, // Number of commute data calls retrieved.
