@@ -1,13 +1,46 @@
+function rendermap(){
+
 
 var map = L.map('map', { center: [38.8813513, -77.1160333], zoom: 18 });
 console.log(map);
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-var myDataPoint = L.marker([38.8815875597, -77.1162584424]).addTo(map);
-L.marker([38.8819420000, -77.1162520000]).addTo(map);
+// var myDataPoint = L.marker([38.8815875597, -77.1162584424]).addTo(map);
+// L.marker([38.8819420000, -77.1162520000]).addTo(map);
 MQ.trafficLayer().addTo(map);
 
-$("#map").append(map)
 
+var markers =[];
+console.log(markers);
+
+for (var i = 0; i < restaurantData.results.length; i++){
+
+    var lat = restaurantData.results[i].latitude;
+    var lon = restaurantData.results[i].longitude;
+    var name = restaurantData.results[i].name;
+
+    var temp = [lat,lon,name];
+    markers.push(temp)
+}
+console.log(markers);
+
+
+//from https://harrywood.co.uk/maps/examples/leaflet/marker-array.view.html
+for (var i=0; i<markers.length; i++) {
+           
+    var lon = markers[i][0];
+    var lat = markers[i][1];
+    var popupText = markers[i][2];
+    
+     var markerLocation = new L.LatLng(lat, lon);
+     var marker = new L.Marker(markerLocation);
+     map.addLayer(marker);
+ 
+     marker.bindPopup(popupText);
+ 
+ }
+
+$("#map").append(map)
+}
 // window.onload = function() {
 //     var map = L.map('map', {
 //       layers: MQ.mapLayer(),
