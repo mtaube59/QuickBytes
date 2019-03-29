@@ -9,7 +9,7 @@ var ZOMATO_START = 0;
 var ZOMATO_DONE = false; // Zomato query is done.
 var MAPQUEST_DONE = false; // Mapquest query is done.
 var TABLE_DATA = []; // Array of data objects.
-
+var map;
 // Object to hold our data.
 var restaurantData = {
     lat: -1, // Lat/Lon of origin
