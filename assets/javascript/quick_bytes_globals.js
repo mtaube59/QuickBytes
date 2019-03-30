@@ -10,6 +10,7 @@ var MAPQUEST_DONE = false; // Mapquest query is done.
 var TABLE_DATA = []; // Array of data objects.
 var NUM_TRANSPORTATION_METHODS = 2; // The number of ways to get food : Driving + walking
 var map;
+
 // Object to hold our data.
 var restaurantData = {
     lat: -1, // Lat/Lon of origin
@@ -23,3 +24,10 @@ var restaurantData = {
     results_found: -1, // Total number of records found
     results: []
 };
+
+// Flags for testing purposes.
+var DO_MAPQUEST = false; // Run mapquest queries.  Turn this off for GUI testing.
+var MIN_TEST_DRIVE_TIME = 3*60;
+var MAX_TEST_DRIVE_TIME = 30*60;
+var MIN_TEST_WALK_TIME = 2*60;
+var MAX_TEST_WALK_TIME = 10*60;

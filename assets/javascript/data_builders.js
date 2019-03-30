@@ -121,17 +121,26 @@ function getRestaurantData(lat, lon, radius_meters) {
                 */
 
 
-                // Call traffic data for this location.
-                getTrafficData(restaurantData.lat,
-                    restaurantData.lon,
-                    place.latitude,
-                    place.longitude);
+                if (DO_MAPQUEST == true) {
+                    // Call traffic data for this location.
+                    getTrafficData(restaurantData.lat,
+                        restaurantData.lon,
+                        place.latitude,
+                        place.longitude);
 
-                // Call walking data for this location.
-                getWalkData(restaurantData.lat,
-                    restaurantData.lon,
-                    place.latitude,
-                    place.longitude);
+                    // Call walking data for this location.
+                    getWalkData(restaurantData.lat,
+                        restaurantData.lon,
+                        place.latitude,
+                        place.longitude);
+                }
+            }
+
+            if (DO_MAPQUEST == false) {
+                getTestTrafficData();
+
+                getTestWalkData();
+
             }
 
             // We should have all the data to render the map here.
@@ -297,5 +306,57 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
 
         }
     });
+}
+
+// Populates the table with bogus drive time data.  Used for testing only.
+function getTestTrafficData() {
+
+    // Search for matching place location entry.
+    for (var i = 0; i < restaurantData.results.length; i++) {
+        var place = restaurantData.results[i];
+
+        // Generate a random drive time.
+        var drive_time_s = Math.random() * (MAX_TEST_DRIVE_TIME - MIN_TEST_DRIVE_TIME) + MIN_TEST_DRIVE_TIME;
+        var drive_time = "01:" + moment(drive_time_s, "X").format("mm:ss");
+        console.log(drive_time);
+        restaurantData.results[i].drive_time = drive_time;
+
+        restaurantData.num_commute_data_retrieved++;
+
+    }
+
+    // Set the done flag if possible.
+    if (restaurantData.num_commute_data_retrieved == (NUM_TRANSPORTATION_METHODS * restaurantData.results.length)) {
+        restaurantData.commute_data_done = true;
+        // Update data to the table.
+        updateTable();
+    }
+
+}
+
+// Populates the table with bogus drive time data.  Used for testing only.
+function getTestWalkData() {
+
+    // Search for matching place location entry.
+    for (var i = 0; i < restaurantData.results.length; i++) {
+        var place = restaurantData.results[i];
+
+        // Generate a random walk time.
+        var walk_time_s = Math.random() * (MAX_TEST_WALK_TIME - MIN_TEST_WALK_TIME) + MIN_TEST_WALK_TIME;
+        var walk_time = "01:" + moment(walk_time_s, "X").format("mm:ss");
+        console.log(walk_time);
+        restaurantData.results[i].walk_time = walk_time;
+
+        restaurantData.num_commute_data_retrieved++;
+
+    }
+
+    // Set the done flag if possible.
+    if (restaurantData.num_commute_data_retrieved == (NUM_TRANSPORTATION_METHODS * restaurantData.results.length)) {
+        restaurantData.commute_data_done = true;
+        // Update data to the table.
+        updateTable();
+    }
+
 }
 
