@@ -1,5 +1,46 @@
 
+// Get all the types of cuisine in the city with given lat/lon.
+function getCuisines(lat, lon) {
 
+    var zomatoQueryURL = "https://developers.zomato.com/api/v2.1/cuisines?" +
+        "&lat=" + lat +
+        "&lon=" + lon;
+
+    $.ajax({
+        url: zomatoQueryURL,
+        dataType: 'json',
+        async: true,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('user-key',
+                ZOMATO_API_KEY);
+        },  // This inserts the api key into the HTTP header
+        success: function (response) {
+            console.log(response);
+        }
+    });
+}
+
+// Get all the types of establishments in the city with given lat/lon.
+function getEstablishments(lat, lon) {
+
+    // Results are sorted in distance ascending order.
+    var zomatoQueryURL = "https://developers.zomato.com/api/v2.1/establishments?" +
+        "&lat=" + lat +
+        "&lon=" + lon;
+
+    $.ajax({
+        url: zomatoQueryURL,
+        dataType: 'json',
+        async: true,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('user-key',
+                ZOMATO_API_KEY);
+        },  // This inserts the api key into the HTTP header
+        success: function (response) {
+            console.log(response);
+        }
+    });
+}
 
 function getRestaurantData(lat, lon, radius_meters) {
 
