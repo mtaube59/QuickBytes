@@ -5,13 +5,12 @@ function getRestaurantData(lat, lon, radius_meters) {
 
     // Results are sorted in distance ascending order.
     var zomatoQueryURL = "https://developers.zomato.com/api/v2.1/search?" +
-        "entity_id=" + ENTITY_ID +
-        "&entity_type=" + ENTITY_TYPE +
         "&lat=" + lat +
         "&lon=" + lon +
         "&radius=" + radius_meters +
-        "&sort=real_distance&order=asc" + 
-        "&start=" + ZOMATO_START;
+        "&sort=real_distance&order=asc" +
+        "&start=" + ZOMATO_START +
+        "&count=" + ZOMATO_COUNT;
 
     restaurantData.lat = lat;
     restaurantData.lon = lon;
@@ -45,6 +44,15 @@ function getRestaurantData(lat, lon, radius_meters) {
             var res_end = res_start + response.results_shown;
             var title = "<h2>Results " + res_start + " - " + res_end + " of " + response.results_found + "</h2>";
             $("#resultsTitle").html(title);
+
+            /*
+            var lat_lon_matrix = [];
+            var lat_lon_entry = [];
+            lat_lon_entry.push(GWU_LAT);
+            lat_lon_entry.push(GWU_LON);
+            lat_lon_matrix.push(lat_lon_entry);
+            console.log("lat_lon_matrix : " + lat_lon_matrix);
+            */
             for (var i = 0; i < response.restaurants.length; i++) {
                 //insertRow(response, i);
 
@@ -63,6 +71,15 @@ function getRestaurantData(lat, lon, radius_meters) {
                 // Push to the end of the restaurantData.results array.
                 restaurantData.results.push(place);
 
+                // TODO : Take this test out.
+                /*
+                if (i == 0) {
+                    lat_lon_entry = [place.latitude, place.longitude];
+                    lat_lon_matrix.push(lat_lon_entry);
+                }
+                */
+
+
                 // Call traffic data for this location.
                 getTrafficData(restaurantData.lat,
                     restaurantData.lon,
@@ -76,13 +93,48 @@ function getRestaurantData(lat, lon, radius_meters) {
                     place.longitude);
             }
 
+            // console.log("calling getTrafficData2");
+            // getTrafficData2(lat_lon_matrix);
+
             // Indicate that restaurant data has been filled.
             restaurantData.place_data_done = true;
             console.log("**");
             console.log(restaurantData);
 
-            // Update data to the table.
-            //updateTable();
+        }
+    });
+}
+
+function getTrafficData2(lat_lon_matrix) {
+    var queryURL = "http://www.mapquestapi.com/directions/v2/routematrix?" +
+        "key=" + MAPQUEST_API_KEY;
+
+    console.log(queryURL);
+
+    var test_data = {
+        "locations": [
+            "Denver, CO",
+            "Westminster, CO",
+            "Boulder, CO"
+        ],
+        "options": {
+            "allToAll": false
+        }
+    };
+
+    console.log("test_data : ");
+    console.log(JSON.stringify(test_data));
+
+    $.ajax({
+        type: "POST",
+        url: queryURL,
+        data: test_data,
+        dataType: 'json',
+        async: true,
+        success: function (response) {
+            console.log("TRAFFIC DATA2 : ");
+            console.log(response);
+
 
         }
     });
@@ -93,7 +145,10 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
     var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
         "key=" + MAPQUEST_API_KEY +
         "&from=" + from_lat + "," + from_lon +
-        "&to=" + to_lat + "," + to_lon;
+        "&to=" + to_lat + "," + to_lon +
+        "&timeType=1" +
+        "&useTraffic=true" +
+        "&doReverseGeocode=false";
 
     console.log(queryURL);
 
@@ -105,15 +160,9 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
             console.log("TRAFFIC DATA : ");
             console.log(response);
 
-            console.log(response.route.locations[1].latLng);
             var lat = 1000000 * response.route.locations[1].latLng.lat;
             var lon = 1000000 * response.route.locations[1].latLng.lng;
-
-            console.log("response lat " + lat);
-            console.log("response lon " + lon);
-
             var drive_time = response.route.formattedTime;
-            console.log("drive_time = " + drive_time);
 
             // Search for matching place location entry.
             for (var i = 0; i < restaurantData.results.length; i++) {
@@ -122,10 +171,16 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
                 var target_lon = Math.round(place.longitude * 1000000);
 
                 if ((lat == target_lat) && (lon == target_lon)) {
-                    console.log("Found at index " + i);
-                    restaurantData.results[i].drive_time = drive_time;
-                    restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
-                    break; // Out of for loop.
+
+                    if (restaurantData.results[i].drive_time == -1) {
+                        console.log("TRAFFIC DATA : Found at index " + i);
+                        restaurantData.results[i].drive_time = drive_time;
+                        restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
+                        break; // Out of for loop.
+                    }
+                    else {
+                        console.log("TRAFFIC DATA : Duplicate lat/lon at index " + i);
+                    }
                 }
             }
 
@@ -149,7 +204,8 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
         "key=" + MAPQUEST_API_KEY +
         "&from=" + from_lat + "," + from_lon +
         "&to=" + to_lat + "," + to_lon +
-        "&routeType=pedestrian";
+        "&routeType=pedestrian" +
+        "&doReverseGeocode=false";
 
     console.log(queryURL);
 
@@ -161,15 +217,9 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
             console.log("WALK DATA : ");
             console.log(response);
 
-            console.log(response.route.locations[1].latLng);
             var lat = 1000000 * response.route.locations[1].latLng.lat;
             var lon = 1000000 * response.route.locations[1].latLng.lng;
-
-            console.log("response lat " + lat);
-            console.log("response lon " + lon);
-
             var walk_time = response.route.formattedTime;
-            console.log("walk_time = " + walk_time);
 
             // Search for matching place location entry.
             for (var i = 0; i < restaurantData.results.length; i++) {
@@ -178,17 +228,25 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
                 var target_lon = Math.round(place.longitude * 1000000);
 
                 if ((lat == target_lat) && (lon == target_lon)) {
-                    console.log("Found at index " + i);
-                    restaurantData.results[i].walk_time = walk_time;
-                    restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
-                    break; // Out of for loop.
+
+                    // If the walk_time has already been filled, go to next.
+                    if (restaurantData.results[i].walk_time == -1) {
+                        console.log("WALK DATA : Found at index " + i);
+                        restaurantData.results[i].walk_time = walk_time;
+                        restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
+                        break; // Out of for loop.
+                    }
+                    else {
+                        console.log("WALK DATA : Duplicate lat/lon at index " + i);
+                    }
+
                 }
             }
 
             // NOTE : Either drive or walk results could return first, so put the check in both places.
 
             // Set the done flag if possible.
-            if (restaurantData.num_commute_data_retrieved == (2 * restaurantData.results.length)) {
+            if (restaurantData.num_commute_data_retrieved == (NUM_TRANSPORTATION_METHODS * restaurantData.results.length)) {
                 restaurantData.commute_data_done = true;
                 // Update data to the table.
                 updateTable();
