@@ -93,6 +93,9 @@ function getRestaurantData(lat, lon, radius_meters) {
                     place.longitude);
             }
 
+            // We should have all the data to render the map here.
+            renderMap();
+
             // console.log("calling getTrafficData2");
             // getTrafficData2(lat_lon_matrix);
 
@@ -191,7 +194,6 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
                 restaurantData.commute_data_done = true;
                 // Update data to the table.
                 updateTable();
-                renderMap();
             }
 
         }
@@ -250,7 +252,6 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
                 restaurantData.commute_data_done = true;
                 // Update data to the table.
                 updateTable();
-                renderMap();
             }
 
         }
