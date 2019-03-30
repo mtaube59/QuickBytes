@@ -1,0 +1,115 @@
+body {
+  background             : url("../images/background.jpg") no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size   : cover;
+  -o-background-size     : cover;
+  background-size        : cover;
+  font-family: "Arvo", sans-serif;
+  font-size  : 20px;
+  text-align : center;
+  
+  width  : 100%;
+  margin : 0;
+  padding: 0;
+}
+
+.jumbotron {
+  margin:4px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+   background-color: rgba(245, 245, 245, 0.842);
+}
+
+.foot {
+  text-align: center;
+  padding: 10px;
+  color: whitesmoke;
+}
+
+.btn:hover {
+font-weight: bold;
+}
+
+.btn {
+background-color: whitesmoke;
+}
+
+
+
+tr:hover {
+background-color: rgb(226, 225, 231);    
+}
+
+
+input[type=text]{
+background-color: rgb(252, 252, 252);    
+}
+
+.custom-select{
+background-color: rgb(252, 252, 252);    
+}
+
+
+.container-image {
+    background: url(lotus.JPG) no-repeat center fixed; 
+    background-size: cover;
+
+}
+
+.card {
+  margin-top: 2%;
+  background-color: rgba(245, 245, 245, 0.842);
+  border: none;
+  border-radius: 0%;
+}
+
+
+@media screen and (max-width: 768px) {
+  .col {
+    min-width: 100%;
+  }
+}
+
+.suggestion {
+  margin-top: 2%;
+  background-color: rgb(48, 114, 4);
+  color: whitesmoke;
+}
+
+.suggestion:hover {
+ background-color: rgba(48, 114, 4, 0.616);
+
+}
+.suggestion .btn {
+  float: right; 
+  margin-top: -6px;
+  color: whitesmoke;
+  background-color: rgb(48, 114, 4);
+}
+
+.suggestion a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.suggestion .btn:hover {
+ background-color: rgba(48, 114, 4, 0.616);
+}
+
+#viewNav {
+  background-color: rgb(226, 225, 231);
+  margin: 0%;
+}
+
+
+/* google map */
+#map-container-5 {
+  width: 100%; height: 400px; margin-top: 40px; margin-bottom: 40px;
+  border:1px solid black; padding-left:5px; padding-right:5px;
+}
+
+.data-validation {
+  color:red;
+  font-size: 75%;
+  font-style: italic;
+}
