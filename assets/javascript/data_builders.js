@@ -81,19 +81,12 @@ function getRestaurantData(lat, lon, radius_meters) {
 
             console.log(restaurantData);
 
-            var res_start = response.results_start;
-            var res_end = res_start + response.results_shown;
-            var title = "<h2>Results " + res_start + " - " + res_end + " of " + response.results_found + "</h2>";
-            $("#resultsTitle").html(title);
-
-            /*
+            // Create the routing matrix with the current location as the first entry.
             var lat_lon_matrix = [];
-            var lat_lon_entry = [];
-            lat_lon_entry.push(GWU_LAT);
-            lat_lon_entry.push(GWU_LON);
-            lat_lon_matrix.push(lat_lon_entry);
+            var lat_lon_pair = "" + GWU_LAT + "," + GWU_LON;
+            lat_lon_matrix.push(lat_lon_pair);
             console.log("lat_lon_matrix : " + lat_lon_matrix);
-            */
+
             for (var i = 0; i < response.restaurants.length; i++) {
                 //insertRow(response, i);
 
@@ -112,42 +105,26 @@ function getRestaurantData(lat, lon, radius_meters) {
                 // Push to the end of the restaurantData.results array.
                 restaurantData.results.push(place);
 
-                // TODO : Take this test out.
-                /*
-                if (i == 0) {
-                    lat_lon_entry = [place.latitude, place.longitude];
-                    lat_lon_matrix.push(lat_lon_entry);
-                }
-                */
-
-
-                if (DO_MAPQUEST == true) {
-                    // Call traffic data for this location.
-                    getTrafficData(restaurantData.lat,
-                        restaurantData.lon,
-                        place.latitude,
-                        place.longitude);
-
-                    // Call walking data for this location.
-                    getWalkData(restaurantData.lat,
-                        restaurantData.lon,
-                        place.latitude,
-                        place.longitude);
-                }
-            }
-
-            if (DO_MAPQUEST == false) {
-                getTestTrafficData();
-
-                getTestWalkData();
+                // Append each location to the routing matrix.
+                lat_lon_pair = "" + place.latitude + "," + place.longitude;
+                lat_lon_matrix.push(lat_lon_pair);
 
             }
 
             // We should have all the data to render the map here.
             renderMap();
 
-            // console.log("calling getTrafficData2");
-            // getTrafficData2(lat_lon_matrix);
+            console.log("lat_lon_matrix : " + lat_lon_matrix);
+            if (DO_MAPQUEST == false) {
+                getTestTrafficData();
+
+                getTestWalkData();
+
+            }
+            else {
+                getTrafficData2(lat_lon_matrix);
+                getWalkData2(lat_lon_matrix);
+            }
 
             // Indicate that restaurant data has been filled.
             restaurantData.place_data_done = true;
@@ -158,39 +135,125 @@ function getRestaurantData(lat, lon, radius_meters) {
     });
 }
 
-function getTrafficData2(lat_lon_matrix) {
-    var queryURL = "http://www.mapquestapi.com/directions/v2/routematrix?" +
-        "key=" + MAPQUEST_API_KEY;
+function getTrafficData2(location_matrix) {
 
-    console.log(queryURL);
-
-    var test_data = {
-        "locations": [
-            "Denver, CO",
-            "Westminster, CO",
-            "Boulder, CO"
-        ],
+    var route_matrix_obj = {
+        "locations": location_matrix,
         "options": {
-            "allToAll": false
+            "allToAll": false,
+            "timeType": 1,
+            "useTraffic": true,
+            "doReverseGeocode": false,
+            "narrativeType": "text"
         }
     };
 
-    console.log("test_data : ");
-    console.log(JSON.stringify(test_data));
+    var route_matrix = JSON.stringify(route_matrix_obj);
 
-    $.ajax({
-        type: "POST",
-        url: queryURL,
-        data: test_data,
-        dataType: 'json',
-        async: true,
-        success: function (response) {
-            console.log("TRAFFIC DATA2 : ");
-            console.log(response);
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "http://www.mapquestapi.com/directions/v2/routematrix?key=" + MAPQUEST_API_KEY,
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json",
+        },
+        "processData": false,
+        "data": route_matrix
+    }
+
+    console.log("getTrafficData2");
+
+    $.ajax(settings).done(function (response) {
+        console.log("getTrafficData2");
+        console.log(response);
 
 
+        // Write drive times to results.
+        for (var i = 0; i < restaurantData.results.length; i++) {
+            var place = restaurantData.results[i];
+            var drive_time_s = response.time[i + 1]; // i + 1 because the 0th entry holds the point of origin.
+            var drive_time_text = hhmmss(drive_time_s);
+            console.log(drive_time_text);
+
+            place.drive_time = drive_time_text;
         }
+
+        // Set the done flag if possible.
+        restaurantData.num_commute_data_retrieved++;
+        if (restaurantData.num_commute_data_retrieved == NUM_TRANSPORTATION_METHODS) {
+            restaurantData.commute_data_done = true;
+            // Update data to the table.
+            updateTable();
+        }
+
     });
+}
+
+function getWalkData2(location_matrix) {
+
+    var route_matrix_obj = {
+        "locations": location_matrix,
+        "options": {
+            "allToAll": false,
+            "routeType": "pedestrian",
+            "doReverseGeocode": false
+        }
+    };
+
+    var route_matrix = JSON.stringify(route_matrix_obj);
+
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "http://www.mapquestapi.com/directions/v2/routematrix?key=" + MAPQUEST_API_KEY,
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json",
+        },
+        "processData": false,
+        "data": route_matrix
+    }
+
+    console.log("getTrafficData2");
+
+    $.ajax(settings).done(function (response) {
+        console.log("getTrafficData2");
+        console.log(response);
+
+
+        // Write drive times to results.
+        for (var i = 0; i < restaurantData.results.length; i++) {
+            var place = restaurantData.results[i];
+            var walk_time_s = response.time[i + 1]; // i + 1 because the 0th entry holds the point of origin.
+            var walk_time_text = hhmmss(walk_time_s);
+            console.log(walk_time_text);
+
+            place.walk_time = walk_time_text;
+        }
+
+        // Set the done flag if possible.
+        restaurantData.num_commute_data_retrieved++;
+        if (restaurantData.num_commute_data_retrieved == NUM_TRANSPORTATION_METHODS) {
+            restaurantData.commute_data_done = true;
+            // Update data to the table.
+            updateTable();
+        }
+
+    });
+}
+
+// Custom coding for converting seconds to hh:mm:ss format.
+// Moment.js does not handle this well.  It adds on bogus hours for some reason.
+function pad(num) {
+    return ("0" + num).slice(-2);
+}
+function hhmmss(secs) {
+    var minutes = Math.floor(secs / 60);
+    secs = secs % 60;
+    var hours = Math.floor(minutes / 60)
+    minutes = minutes % 60;
+    return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
 }
 
 function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
