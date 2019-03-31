@@ -85,7 +85,6 @@ function getRestaurantData(lat, lon, radius_meters) {
             var res_end = res_start + response.results_shown;
 
             for (var i = 0; i < response.restaurants.length; i++) {
-                //insertRow(response, i);
 
                 var currentRestaurant = response.restaurants[i];
                 // Temporary object to hold individual restaurant data.
@@ -100,7 +99,9 @@ function getRestaurantData(lat, lon, radius_meters) {
                     drive_time_s: -1,
                     walk_time_s: -1,
                     driving_directions: [],
-                    walking_directions: []
+                    walking_directions: [],
+                    is_quickest_drive: false,
+                    is_quickest_walk: false
                 }
 
                 // Push to the end of the restaurantData.results array.
@@ -131,48 +132,10 @@ function getRestaurantData(lat, lon, radius_meters) {
             // We should have all the data to render the map here.
             renderMap();
 
-            // console.log("calling getTrafficData2");
-            // getTrafficData2(lat_lon_matrix);
-
             // Indicate that restaurant data has been filled.
             restaurantData.place_data_done = true;
             console.log("**");
             console.log(restaurantData);
-
-        }
-    });
-}
-
-function getTrafficData2(lat_lon_matrix) {
-    var queryURL = "http://www.mapquestapi.com/directions/v2/routematrix?" +
-        "key=" + MAPQUEST_API_KEY;
-
-    console.log(queryURL);
-
-    var test_data = {
-        "locations": [
-            "Denver, CO",
-            "Westminster, CO",
-            "Boulder, CO"
-        ],
-        "options": {
-            "allToAll": false
-        }
-    };
-
-    console.log("test_data : ");
-    console.log(JSON.stringify(test_data));
-
-    $.ajax({
-        type: "POST",
-        url: queryURL,
-        data: test_data,
-        dataType: 'json',
-        async: true,
-        success: function (response) {
-            console.log("TRAFFIC DATA2 : ");
-            console.log(response);
-
 
         }
     });
@@ -244,6 +207,10 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
             // Set the done flag if possible.
             if (restaurantData.num_commute_data_retrieved == (2 * restaurantData.results.length)) {
                 restaurantData.commute_data_done = true;
+
+                // Find the quickest commutes.
+                markQuickest();
+
                 // Update data to the table.
                 updateTable();
             }
@@ -319,6 +286,10 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
             // Set the done flag if possible.
             if (restaurantData.num_commute_data_retrieved == (NUM_TRANSPORTATION_METHODS * restaurantData.results.length)) {
                 restaurantData.commute_data_done = true;
+
+                // Find the quickest commutes.
+                markQuickest();
+
                 // Update data to the table.
                 updateTable();
             }
@@ -377,5 +348,44 @@ function getTestWalkData() {
         updateTable();
     }
 
+}
+
+// Mark the quickest driving and walking destinations.
+function markQuickest() {
+
+    // Find the quickest commutes.
+    var quickest_drive_idx = -1;
+    var quickest_drive_time = -1;
+    var quickest_walk_idx = -1;
+    var quickest_walk_time = -1;
+    for (var i = 0; i < restaurantData.results.length; i++) {
+        var place = restaurantData.results[i];
+
+        if ( i==0 ) {
+            quickest_drive_idx = i;
+            quickest_walk_idx = i;
+            quickest_drive_time = place.drive_time_s;
+            quickest_walk_time = place.walk_time_s;
+        }
+        else {
+            if (place.drive_time_s < quickest_drive_time) {
+                quickest_drive_idx = i;
+                quickest_drive_time = place.drive_time_s;
+            }
+
+            if (place.walk_time_s < quickest_walk_time) {
+                quickest_walk_idx = i;
+                quickest_walk_time = place.walk_time_s;
+            }
+        }
+    }
+
+    // Mark the entries.
+    if ( quickest_drive_idx!=-1 ) {
+        restaurantData.results[quickest_drive_idx].is_quickest_drive = true;
+    }
+    if ( quickest_walk_idx!=-1 ) {
+        restaurantData.results[quickest_walk_idx].is_quickest_walk = true;
+    }
 }
 
