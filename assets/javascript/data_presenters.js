@@ -26,20 +26,19 @@ function getRadiusMeters() {
 function updateTable() {
     console.log("updateTable : ");
     console.log(restaurantData);
-    for (var i = 0; i < restaurantData.results.length; i++) {
-        var place = restaurantData.results[i];
-        insertRow(place);
+    for (var i = 0; i < restaurantData.getResultsLength(); i++) {
+        insertRow(i);
     }
 }
 
 // Insert an entry to a row in the table.
-function insertRow(place) {
+function insertRow(idx) {
 
-    var name = place.name;
-    var rating = place.rating;
-    var votes = place.votes;
-    var drive_time = place.drive_time;
-    var walk_time = place.walk_time;
+    var name = restaurantData.getPlaceName(idx);
+    var rating = restaurantData.getPlaceRating(idx);
+    var votes = restaurantData.getPlaceVotes(idx);
+    var drive_time = restaurantData.getPlaceDriveTime(idx);
+    var walk_time = restaurantData.getPlaceWalkTime(idx);
 
     // Create the new row
     var newRow = $("<tr>").append(
