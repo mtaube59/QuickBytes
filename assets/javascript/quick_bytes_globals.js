@@ -26,7 +26,7 @@ var restaurantData = {
 };
 
 // Flags for testing purposes.
-var DO_MAPQUEST = false; // Run mapquest queries.  Turn this off for GUI testing.
+var DO_MAPQUEST = true; // Run mapquest queries.  Turn this off for GUI testing.
 var MIN_TEST_DRIVE_TIME = 3*60;
 var MAX_TEST_DRIVE_TIME = 30*60;
 var MIN_TEST_WALK_TIME = 2*60;

@@ -83,17 +83,7 @@ function getRestaurantData(lat, lon, radius_meters) {
 
             var res_start = response.results_start;
             var res_end = res_start + response.results_shown;
-            var title = "<h2>Results " + res_start + " - " + res_end + " of " + response.results_found + "</h2>";
-            $("#resultsTitle").html(title);
 
-            /*
-            var lat_lon_matrix = [];
-            var lat_lon_entry = [];
-            lat_lon_entry.push(GWU_LAT);
-            lat_lon_entry.push(GWU_LON);
-            lat_lon_matrix.push(lat_lon_entry);
-            console.log("lat_lon_matrix : " + lat_lon_matrix);
-            */
             for (var i = 0; i < response.restaurants.length; i++) {
                 //insertRow(response, i);
 
@@ -106,20 +96,15 @@ function getRestaurantData(lat, lon, radius_meters) {
                     latitude: currentRestaurant.restaurant.location.latitude,
                     longitude: currentRestaurant.restaurant.location.longitude,
                     drive_time: -1,
-                    walk_time: -1
+                    walk_time: -1,
+                    drive_time_s: -1,
+                    walk_time_s: -1,
+                    driving_directions: [],
+                    walking_directions: []
                 }
 
                 // Push to the end of the restaurantData.results array.
                 restaurantData.results.push(place);
-
-                // TODO : Take this test out.
-                /*
-                if (i == 0) {
-                    lat_lon_entry = [place.latitude, place.longitude];
-                    lat_lon_matrix.push(lat_lon_entry);
-                }
-                */
-
 
                 if (DO_MAPQUEST == true) {
                     // Call traffic data for this location.
@@ -216,6 +201,7 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
             var lat = 1000000 * response.route.locations[1].latLng.lat;
             var lon = 1000000 * response.route.locations[1].latLng.lng;
             var drive_time = response.route.formattedTime;
+            var legs = response.route.legs;
 
             // Search for matching place location entry.
             for (var i = 0; i < restaurantData.results.length; i++) {
@@ -228,6 +214,22 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
                     if (restaurantData.results[i].drive_time == -1) {
                         console.log("TRAFFIC DATA : Found at index " + i);
                         restaurantData.results[i].drive_time = drive_time;
+
+                        // Store drive time in seconds.
+                        var drive_time_s = moment(drive_time, "HH:mm:ss").diff(moment().startOf('day'), 'seconds');
+                        restaurantData.results[i].drive_time_s = drive_time_s;
+
+                        // Store the driving directions.
+                        for (var j = 0; j < legs.length; j++) {
+                            var maneuvers = legs[j].maneuvers;
+                            for (var k = 0; k < (maneuvers.length - 1); k++) {
+                                var direction_text = maneuvers[k].narrative + " Distance : " + maneuvers[k].distance + " miles.";
+                                restaurantData.results[i].driving_directions.push(direction_text);
+                            }
+                            var direction_text = maneuvers[(maneuvers.length - 1)].narrative;
+                            restaurantData.results[i].driving_directions.push(direction_text);
+                        }
+
                         restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
                         break; // Out of for loop.
                     }
@@ -272,6 +274,7 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
             var lat = 1000000 * response.route.locations[1].latLng.lat;
             var lon = 1000000 * response.route.locations[1].latLng.lng;
             var walk_time = response.route.formattedTime;
+            var legs = response.route.legs;
 
             // Search for matching place location entry.
             for (var i = 0; i < restaurantData.results.length; i++) {
@@ -285,6 +288,22 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
                     if (restaurantData.results[i].walk_time == -1) {
                         console.log("WALK DATA : Found at index " + i);
                         restaurantData.results[i].walk_time = walk_time;
+
+                        // Store the time in seconds.
+                        var walk_time_s = moment(walk_time, "HH:mm:ss").diff(moment().startOf('day'), 'seconds');
+                        restaurantData.results[i].walk_time_s = walk_time_s;
+
+                        // Store the driving directions.
+                        for (var j = 0; j < legs.length; j++) {
+                            var maneuvers = legs[j].maneuvers;
+                            for (var k = 0; k < (maneuvers.length - 1); k++) {
+                                var direction_text = maneuvers[k].narrative + " Distance : " + maneuvers[k].distance + " miles.";
+                                restaurantData.results[i].walking_directions.push(direction_text);
+                            }
+                            var direction_text = maneuvers[(maneuvers.length - 1)].narrative;
+                            restaurantData.results[i].walking_directions.push(direction_text);
+                        }
+
                         restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
                         break; // Out of for loop.
                     }

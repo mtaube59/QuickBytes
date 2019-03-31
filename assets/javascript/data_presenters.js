@@ -22,9 +22,11 @@ function getRadiusMeters() {
  * These functions modify the HTML file.
  */
 
-  // Update the table.
-  function updateTable() {
-    for ( var i=0; i<restaurantData.results.length; i++ ) {
+// Update the table.
+function updateTable() {
+    console.log("updateTable : ");
+    console.log(restaurantData);
+    for (var i = 0; i < restaurantData.results.length; i++) {
         var place = restaurantData.results[i];
         insertRow(place);
     }
@@ -33,34 +35,34 @@ function getRadiusMeters() {
 // Insert an entry to a row in the table.
 function insertRow(place) {
 
-   var name = place.name;
-   var rating = place.rating;
-   var votes = place.votes;
-   var drive_time = place.drive_time;
-   var walk_time = place.walk_time;
+    var name = place.name;
+    var rating = place.rating;
+    var votes = place.votes;
+    var drive_time = place.drive_time;
+    var walk_time = place.walk_time;
 
-   // Create the new row
-   var newRow = $("<tr>").append(
-       $("<td>").text(name),
-       $("<td>").text(rating),
-       $("<td>").text(votes),
-       $("<td>").text(drive_time),
-       $("<td>").text(walk_time)
-   );
+    // Create the new row
+    var newRow = $("<tr>").append(
+        $("<td>").text(name),
+        $("<td>").text(rating),
+        $("<td>").text(votes),
+        $("<td>").text(drive_time),
+        $("<td>").text(walk_time)
+    );
 
-   // Append the new row to the table
-   $("#dtBasicExample > tbody").append(newRow);
+    // Append the new row to the table
+    $("#dtBasicExample > tbody").append(newRow);
 
 }
 
 
- // Update the table.
- function updateTestTable() {
-     for ( var i=0; i<restaurantData.results.length; i++ ) {
-         var place = restaurantData.results[i];
-         insertRow(place);
-     }
- }
+// Update the table.
+function updateTestTable() {
+    for (var i = 0; i < restaurantData.results.length; i++) {
+        var place = restaurantData.results[i];
+        insertRow(place);
+    }
+}
 
 // Insert an entry to a row in the table.
 function insertTestRow(place) {
