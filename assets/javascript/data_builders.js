@@ -66,6 +66,8 @@ function getRestaurantData(lat, lon, radius_meters) {
                 ZOMATO_API_KEY);
         },  // This inserts the api key into the HTTP header
         success: function (response) {
+
+            console.log("**** ZOMATO RESULTS ****");
             console.log(response)
 
             // Object to hold our data.
@@ -101,7 +103,12 @@ function getRestaurantData(lat, lon, radius_meters) {
                     driving_directions: [],
                     walking_directions: [],
                     is_quickest_drive: false,
-                    is_quickest_walk: false
+                    is_quickest_walk: false,
+                    cuisines: currentRestaurant.restaurant.cuisines,
+                    menu_url: currentRestaurant.restaurant.menu_url,
+                    rating_text: currentRestaurant.restaurant.user_rating.rating_text,
+                    price_range: currentRestaurant.restaurant.price_range
+
                 }
 
                 // Push to the end of the restaurantData.results array.
