@@ -32,4 +32,4 @@ var MAX_TEST_DRIVE_TIME = 30*60;
 var MIN_TEST_WALK_TIME = 2*60;
 var MAX_TEST_WALK_TIME = 10*60;
 
-var latlon = [38.8813513, -77.1160333]
+var latlon = [GWU_LAT, GWU_LON];
