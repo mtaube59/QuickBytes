@@ -66,12 +66,12 @@ function getRestaurantData(lat, lon, radius_meters) {
                 ZOMATO_API_KEY);
         },  // This inserts the api key into the HTTP header
         success: function (response) {
+
+            console.log("**** ZOMATO RESULTS ****");
             console.log(response)
 
             // Object to hold our data.
             restaurantData.place_data_done = false;
-            restaurantData.commute_data_done = false;
-            restaurantData.num_commute_data_retrieved = 0; // Number of commute data calls retrieved.
             restaurantData.results_start = response.results_start;
             restaurantData.results_shown = response.results_shown;
             restaurantData.results_found = response.results_found;
@@ -81,19 +81,7 @@ function getRestaurantData(lat, lon, radius_meters) {
 
             console.log(restaurantData);
 
-            var res_start = response.results_start;
-            var res_end = res_start + response.results_shown;
-
-            /*
-            var lat_lon_matrix = [];
-            var lat_lon_entry = [];
-            lat_lon_entry.push(GWU_LAT);
-            lat_lon_entry.push(GWU_LON);
-            lat_lon_matrix.push(lat_lon_entry);
-            console.log("lat_lon_matrix : " + lat_lon_matrix);
-            */
             for (var i = 0; i < response.restaurants.length; i++) {
-                //insertRow(response, i);
 
                 var currentRestaurant = response.restaurants[i];
                 // Temporary object to hold individual restaurant data.
@@ -104,48 +92,53 @@ function getRestaurantData(lat, lon, radius_meters) {
                     latitude: currentRestaurant.restaurant.location.latitude,
                     longitude: currentRestaurant.restaurant.location.longitude,
                     drive_time: -1,
-                    walk_time: -1
+                    walk_time: -1,
+                    drive_time_s: -1,
+                    walk_time_s: -1,
+                    driving_directions: [],
+                    walking_directions: [],
+                    is_quickest_drive: false,
+                    is_quickest_walk: false,
+                    cuisines: currentRestaurant.restaurant.cuisines,
+                    menu_url: currentRestaurant.restaurant.menu_url,
+                    rating_text: currentRestaurant.restaurant.user_rating.rating_text,
+                    price_range: currentRestaurant.restaurant.price_range,
+                    traffic_data_request: null,
+                    walk_data_request: null,
+                    traffic_data_request_returned: false,
+                    walk_data_request_returned: false,
+                    is_data_valid: false
+
                 }
 
                 // Push to the end of the restaurantData.results array.
                 restaurantData.results.push(place);
 
-                // TODO : Take this test out.
-                /*
-                if (i == 0) {
-                    lat_lon_entry = [place.latitude, place.longitude];
-                    lat_lon_matrix.push(lat_lon_entry);
-                }
-                */
-
-
-                if (DO_MAPQUEST == true) {
-                    // Call traffic data for this location.
-                    getTrafficData(restaurantData.lat,
-                        restaurantData.lon,
-                        place.latitude,
-                        place.longitude);
-
-                    // Call walking data for this location.
-                    getWalkData(restaurantData.lat,
-                        restaurantData.lon,
-                        place.latitude,
-                        place.longitude);
-                }
-            }
-
-            if (DO_MAPQUEST == false) {
-                getTestTrafficData();
-
-                getTestWalkData();
 
             }
 
             // We should have all the data to render the map here.
             renderMap();
 
-            // console.log("calling getTrafficData2");
-            // getTrafficData2(lat_lon_matrix);
+            // If MapQuest queries are turned on.
+            // Need to do this to avoid maxing out the number of queries per month
+            // during testing phase.
+            if (DO_MAPQUEST == true) {
+
+                for (var i = 0; i < restaurantData.getResultsLength(); i++) {
+                    // Call traffic data for this location.
+                    getTrafficData(i);
+
+                    // Call walking data for this location.
+                    getWalkData(i);
+                }
+
+            }
+            else { // Generate bogus test data.
+                getTestTrafficData();
+
+                getTestWalkData();
+            }
 
             // Indicate that restaurant data has been filled.
             restaurantData.place_data_done = true;
@@ -156,42 +149,12 @@ function getRestaurantData(lat, lon, radius_meters) {
     });
 }
 
-function getTrafficData2(lat_lon_matrix) {
-    var queryURL = "http://www.mapquestapi.com/directions/v2/routematrix?" +
-        "key=" + MAPQUEST_API_KEY;
+function getTrafficData(idx) {
 
-    console.log(queryURL);
-
-    var test_data = {
-        "locations": [
-            "Denver, CO",
-            "Westminster, CO",
-            "Boulder, CO"
-        ],
-        "options": {
-            "allToAll": false
-        }
-    };
-
-    console.log("test_data : ");
-    console.log(JSON.stringify(test_data));
-
-    $.ajax({
-        type: "POST",
-        url: queryURL,
-        data: test_data,
-        dataType: 'json',
-        async: true,
-        success: function (response) {
-            console.log("TRAFFIC DATA2 : ");
-            console.log(response);
-
-
-        }
-    });
-}
-
-function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
+    var from_lat = restaurantData.getOriginLat();
+    var from_lon = restaurantData.getOriginLon();
+    var to_lat = restaurantData.getPlaceLatitude(idx);
+    var to_lon = restaurantData.getPlaceLongitude(idx);
 
     var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
         "key=" + MAPQUEST_API_KEY +
@@ -203,52 +166,76 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
 
     console.log(queryURL);
 
-    $.ajax({
+    var traffic_data_request = $.ajax({
         url: queryURL,
         dataType: 'json',
         async: true,
-        success: function (response) {
+        success: function (response, arg2, request) {
             console.log("TRAFFIC DATA : ");
             console.log(response);
 
-            var lat = 1000000 * response.route.locations[1].latLng.lat;
-            var lon = 1000000 * response.route.locations[1].latLng.lng;
             var drive_time = response.route.formattedTime;
+            var legs = response.route.legs;
 
-            // Search for matching place location entry.
-            for (var i = 0; i < restaurantData.results.length; i++) {
-                var place = restaurantData.results[i];
-                var target_lat = Math.round(place.latitude * 1000000);
-                var target_lon = Math.round(place.longitude * 1000000);
+            var i = restaurantData.findTrafficDataRequest(request);
+            if (i != null) {
+                console.log("MATCH FOR REQUEST FOUND AT " + i);
 
-                if ((lat == target_lat) && (lon == target_lon)) {
+                restaurantData.setPlaceDriveTime(i, drive_time);
 
-                    if (restaurantData.results[i].drive_time == -1) {
-                        console.log("TRAFFIC DATA : Found at index " + i);
-                        restaurantData.results[i].drive_time = drive_time;
-                        restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
-                        break; // Out of for loop.
+                // Store drive time in seconds.
+                var drive_time_s = moment(drive_time, "HH:mm:ss").diff(moment().startOf('day'), 'seconds');
+                restaurantData.setPlaceDriveTimeS(i, drive_time_s);
+
+                // Store the driving directions.
+                var directions_text_arr = [];
+                for (var j = 0; j < legs.length; j++) {
+                    var maneuvers = legs[j].maneuvers;
+
+                    for (var k = 0; k < (maneuvers.length - 1); k++) {
+                        var direction_text = maneuvers[k].narrative + " Distance : " + maneuvers[k].distance + " miles.";
+                        directions_text_arr.push(direction_text);
                     }
-                    else {
-                        console.log("TRAFFIC DATA : Duplicate lat/lon at index " + i);
-                    }
+                    var direction_text = maneuvers[(maneuvers.length - 1)].narrative;
+                    directions_text_arr.push(direction_text);
                 }
+
+                restaurantData.setPlaceDrivingDirections(i, directions_text_arr);
+            }
+            else {
+                console.log("NO MATCH FOUND");
             }
 
+        },
+        complete: function (request, status) {
+            // Mark the request as returned.
+            var i = restaurantData.findTrafficDataRequest(request);
+            if (i != null) {
+                restaurantData.setPlaceTrafficDataRequestReturned(i, true);
+                restaurantData.checkPlaceIsDataValid(i);
+            }
             // NOTE : Either drive or walk results could return first, so put the check in both places.
+            if (restaurantData.allTrafficDataRequestsDone() && restaurantData.allWalkDataRequestsDone()) {
+                // Find the quickest commutes.
+                restaurantData.markQuickest();
 
-            // Set the done flag if possible.
-            if (restaurantData.num_commute_data_retrieved == (2 * restaurantData.results.length)) {
-                restaurantData.commute_data_done = true;
                 // Update data to the table.
                 updateTable();
             }
 
         }
     });
+
+    // Store the request object.
+    restaurantData.setPlaceTrafficDataRequest(idx, traffic_data_request);
 }
 
-function getWalkData(from_lat, from_lon, to_lat, to_lon) {
+function getWalkData(idx) {
+
+    var from_lat = restaurantData.getOriginLat();
+    var from_lon = restaurantData.getOriginLon();
+    var to_lat = restaurantData.getPlaceLatitude(idx);
+    var to_lon = restaurantData.getPlaceLongitude(idx);
 
     var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
         "key=" + MAPQUEST_API_KEY +
@@ -259,73 +246,97 @@ function getWalkData(from_lat, from_lon, to_lat, to_lon) {
 
     console.log(queryURL);
 
-    $.ajax({
+    var walk_data_request = $.ajax({
         url: queryURL,
         dataType: 'json',
         async: true,
-        success: function (response) {
+        success: function (response, arg2, request) {
             console.log("WALK DATA : ");
             console.log(response);
 
-            var lat = 1000000 * response.route.locations[1].latLng.lat;
-            var lon = 1000000 * response.route.locations[1].latLng.lng;
             var walk_time = response.route.formattedTime;
+            var legs = response.route.legs;
 
-            // Search for matching place location entry.
-            for (var i = 0; i < restaurantData.results.length; i++) {
-                var place = restaurantData.results[i];
-                var target_lat = Math.round(place.latitude * 1000000);
-                var target_lon = Math.round(place.longitude * 1000000);
+            var i = restaurantData.findWalkDataRequest(request);
+            if (i != null) {
+                console.log("MATCH FOR REQUEST FOUND AT " + i);
 
-                if ((lat == target_lat) && (lon == target_lon)) {
+                restaurantData.setPlaceWalkTime(i, walk_time);
 
-                    // If the walk_time has already been filled, go to next.
-                    if (restaurantData.results[i].walk_time == -1) {
-                        console.log("WALK DATA : Found at index " + i);
-                        restaurantData.results[i].walk_time = walk_time;
-                        restaurantData.num_commute_data_retrieved++;  // Increment this so we know when we are done.
-                        break; // Out of for loop.
+                // Store drive time in seconds.
+                var walk_time_s = moment(walk_time, "HH:mm:ss").diff(moment().startOf('day'), 'seconds');
+                restaurantData.setPlaceWalkTimeS(i, walk_time_s);
+
+                // Store the driving directions.
+                var directions_text_arr = [];
+                for (var j = 0; j < legs.length; j++) {
+                    var maneuvers = legs[j].maneuvers;
+
+                    for (var k = 0; k < (maneuvers.length - 1); k++) {
+                        var direction_text = maneuvers[k].narrative + " Distance : " + maneuvers[k].distance + " miles.";
+                        directions_text_arr.push(direction_text);
                     }
-                    else {
-                        console.log("WALK DATA : Duplicate lat/lon at index " + i);
-                    }
-
+                    var direction_text = maneuvers[(maneuvers.length - 1)].narrative;
+                    directions_text_arr.push(direction_text);
                 }
+
+                restaurantData.setPlaceWalkingDirections(i, directions_text_arr);
+            }
+            else {
+                console.log("MATCH NOT FOUND");
             }
 
+        },
+        complete: function (request, status) {
+            // Mark the request as returned.
+            var i = restaurantData.findWalkDataRequest(request);
+            if (i != null) {
+                restaurantData.setPlaceWalkDataRequestReturned(i, true);
+                restaurantData.checkPlaceIsDataValid(i);
+            }
             // NOTE : Either drive or walk results could return first, so put the check in both places.
+            if (restaurantData.allTrafficDataRequestsDone() && restaurantData.allWalkDataRequestsDone()) {
+                // Find the quickest commutes.
+                restaurantData.markQuickest();
 
-            // Set the done flag if possible.
-            if (restaurantData.num_commute_data_retrieved == (NUM_TRANSPORTATION_METHODS * restaurantData.results.length)) {
-                restaurantData.commute_data_done = true;
                 // Update data to the table.
                 updateTable();
             }
 
         }
     });
+
+    // Store request object.
+    restaurantData.setPlaceWalkDataRequest(idx, walk_data_request);
 }
 
 // Populates the table with bogus drive time data.  Used for testing only.
 function getTestTrafficData() {
 
     // Search for matching place location entry.
-    for (var i = 0; i < restaurantData.results.length; i++) {
-        var place = restaurantData.results[i];
+    for (var i = 0; i < restaurantData.getResultsLength(); i++) {
 
         // Generate a random drive time.
         var drive_time_s = Math.random() * (MAX_TEST_DRIVE_TIME - MIN_TEST_DRIVE_TIME) + MIN_TEST_DRIVE_TIME;
         var drive_time = "01:" + moment(drive_time_s, "X").format("mm:ss");
         console.log(drive_time);
-        restaurantData.results[i].drive_time = drive_time;
+        restaurantData.setPlaceDriveTimeS(i, drive_time_s);
+        restaurantData.setPlaceDriveTime(i, drive_time);
 
-        restaurantData.num_commute_data_retrieved++;
+        // Set some bogus directions.
+        var directions_text_arr = ["Bogus drive directions 1", "Bogus drive directions 2", "You are at " + restaurantData.getPlaceName(i)];
+        restaurantData.setPlaceDrivingDirections(i, directions_text_arr);
 
+        restaurantData.setPlaceTrafficDataRequestReturned(i, true);
+        restaurantData.checkPlaceIsDataValid(i);
     }
 
     // Set the done flag if possible.
-    if (restaurantData.num_commute_data_retrieved == (NUM_TRANSPORTATION_METHODS * restaurantData.results.length)) {
-        restaurantData.commute_data_done = true;
+    if (restaurantData.allTrafficDataRequestsDone() && restaurantData.allWalkDataRequestsDone()) {
+
+        // Find the quickest commutes.
+        restaurantData.markQuickest();
+
         // Update data to the table.
         updateTable();
     }
@@ -336,25 +347,35 @@ function getTestTrafficData() {
 function getTestWalkData() {
 
     // Search for matching place location entry.
-    for (var i = 0; i < restaurantData.results.length; i++) {
-        var place = restaurantData.results[i];
+    for (var i = 0; i < restaurantData.getResultsLength(); i++) {
 
         // Generate a random walk time.
         var walk_time_s = Math.random() * (MAX_TEST_WALK_TIME - MIN_TEST_WALK_TIME) + MIN_TEST_WALK_TIME;
         var walk_time = "01:" + moment(walk_time_s, "X").format("mm:ss");
         console.log(walk_time);
-        restaurantData.results[i].walk_time = walk_time;
+        restaurantData.setPlaceWalkTimeS(i, walk_time_s);
+        restaurantData.setPlaceWalkTime(i, walk_time);
 
-        restaurantData.num_commute_data_retrieved++;
+        // Set some bogus directions.
+        var directions_text_arr = ["Bogus walk directions 1", "Bogus walk directions 2", "You are at " + restaurantData.getPlaceName(i)];
+        restaurantData.setPlaceWalkingDirections(i, directions_text_arr);
+
+        restaurantData.setPlaceWalkDataRequestReturned(i, true);
+        restaurantData.checkPlaceIsDataValid(i);
 
     }
 
     // Set the done flag if possible.
-    if (restaurantData.num_commute_data_retrieved == (NUM_TRANSPORTATION_METHODS * restaurantData.results.length)) {
-        restaurantData.commute_data_done = true;
+    if (restaurantData.allTrafficDataRequestsDone() && restaurantData.allWalkDataRequestsDone()) {
+
+        // Find the quickest commutes.
+        restaurantData.markQuickest();
+
         // Update data to the table.
         updateTable();
     }
 
 }
+
+
 
