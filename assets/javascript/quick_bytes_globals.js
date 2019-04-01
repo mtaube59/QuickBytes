@@ -24,8 +24,6 @@ var restaurantData = {
     lon: -1,
     radius_meters: -1, // Search radius
     place_data_done: false,  // Do we have all the restaurant place data?
-    commute_data_done: false, // Do we have all the commute data?
-    num_commute_data_retrieved: -1, // Number of commute data calls retrieved.
     results_start: -1, // Starting record
     results_shown: -1, // Number of records shown
     results_found: -1, // Total number of records found
@@ -201,6 +199,42 @@ var restaurantData = {
         }
     },
 
+    getPlaceTrafficDataRequest: function (idx) {
+        if (idx < this.results.length) {
+            return this.results[idx].traffic_data_request;
+        }
+        else {
+            return null;
+        }
+    },
+
+    getPlaceWalkDataRequest: function (idx) {
+        if (idx < this.results.length) {
+            return this.results[idx].walk_data_request;
+        }
+        else {
+            return null;
+        }
+    },
+
+    getPlaceTrafficDataRequestReturned: function (idx) {
+        if (idx < this.results.length) {
+            return this.results[idx].traffic_data_request_returned;
+        }
+        else {
+            return null;
+        }
+    },
+
+    getPlaceWalkDataRequestReturned: function (idx) {
+        if (idx < this.results.length) {
+            return this.results[idx].walk_data_request_returned;
+        }
+        else {
+            return null;
+        }
+    },
+
     // Setters.
     setOriginLat: function (x) {
         this.lat = x;
@@ -367,6 +401,42 @@ var restaurantData = {
         }
     },
 
+    setPlaceTrafficDataRequest: function (idx, x) {
+        if (idx < this.results.length) {
+            this.results[idx].traffic_data_request = x;
+        }
+        else {
+            console.log("Index " + idx + " does not exist.");
+        }
+    },
+
+    setPlaceWalkDataRequest: function (idx, x) {
+        if (idx < this.results.length) {
+            this.results[idx].walk_data_request = x;
+        }
+        else {
+            console.log("Index " + idx + " does not exist.");
+        }
+    },
+
+    setPlaceTrafficDataRequestReturned: function (idx, x) {
+        if (idx < this.results.length) {
+            this.results[idx].traffic_data_request_returned = x;
+        }
+        else {
+            console.log("Index " + idx + " does not exist.");
+        }
+    },
+
+    setPlaceWalkDataRequestReturned: function (idx, x) {
+        if (idx < this.results.length) {
+            this.results[idx].walk_data_request_returned = x;
+        }
+        else {
+            console.log("Index " + idx + " does not exist.");
+        }
+    },
+
     // Mark the quickest driving and walking destinations.
     markQuickest: function () {
 
@@ -403,6 +473,56 @@ var restaurantData = {
         if (quickest_walk_idx != -1) {
             this.setPlaceIsQuickestWalk(quickest_walk_idx, true);
         }
+    },
+
+    // Find the results index that has the matching traffic data request object.
+    findTrafficDataRequest: function (request) {
+        var match_idx = null;
+        for (var i = 0; i < this.getResultsLength(); i++) {
+            if (request === this.getPlaceTrafficDataRequest(i)) {
+                match_idx = i;
+            }
+        }
+
+        return match_idx;
+    },
+
+    // Find the results index that has the matching walk data request object.
+    findWalkDataRequest: function (request) {
+        var match_idx = null;
+        for (var i = 0; i < this.getResultsLength(); i++) {
+            if (request === this.getPlaceWalkDataRequest(i)) {
+                match_idx = i;
+            }
+        }
+
+        return match_idx;
+    },
+
+    // Did all traffic data requests return?
+    allTrafficDataRequestsDone: function () {
+        var all_done = true;
+        for (var i = 0; i < this.getResultsLength(); i++) {
+            if (this.getPlaceTrafficDataRequestReturned(i) == false) {
+                all_done = false;
+                break;
+            }
+        }
+
+        return all_done;
+    },
+
+    // Did all walk data requests return?
+    allWalkDataRequestsDone: function () {
+        var all_done = true;
+        for (var i = 0; i < this.getResultsLength(); i++) {
+            if (this.getPlaceWalkDataRequestReturned(i) == false) {
+                all_done = false;
+                break;
+            }
+        }
+
+        return all_done;
     }
 
 };
