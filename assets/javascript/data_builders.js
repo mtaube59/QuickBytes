@@ -83,8 +83,6 @@ function getRestaurantData(lat, lon, radius_meters) {
 
             var res_start = response.results_start;
             var res_end = res_start + response.results_shown;
-            var title = "<h2>Results " + res_start + " - " + res_end + " of " + response.results_found + "</h2>";
-            $("#resultsTitle").html(title);
 
             /*
             var lat_lon_matrix = [];

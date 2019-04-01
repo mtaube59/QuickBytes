@@ -34,6 +34,8 @@ function getLatLong() {
            map.remove()
            mapInit()
 
+           makeBackendCalls();
+
        }
    });
 }

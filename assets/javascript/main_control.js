@@ -5,14 +5,21 @@ $(document).ready(function () {
 
     console.log("Main");
 
+    makeBackendCalls();
+
+})
+
+function makeBackendCalls() {
+
+    console.log("makeBackendCalls");
+
     var lat = getLat();
     var lon = getLon();
 
     // Call restaurant type functions.
-    // getCuisines(lat, lon);
-    // getEstablishments(lat, lon);
+    getCuisines(lat, lon);
+    getEstablishments(lat, lon);
 
     var radius_meters = getRadiusMeters();
     getRestaurantData(lat, lon, radius_meters);
-
-})
+}
