@@ -136,11 +136,16 @@ background-color: rgb(252, 252, 252);
     top: 72%;
     left: 50%;
     transform: translate(-50%, -50%);
-
+    color: grey;
 }
-.footer {
+footer {
   display: block;
   background-color: #E2DCD5;
   bottom: 0;
   width: 100%;
+  height: 50px;
+  
+}
+#footerText {
+  padding-top: 10px;
 }

@@ -1,5 +1,4 @@
 function mapInit() {
-    latlon = [38.8813513, -77.1160333]
     map = L.map('map', { center: latlon, zoom: 17 });
     //code from https://github.com/pointhi/leaflet-color-markers
     var greenIcon = new L.Icon({
@@ -10,7 +9,7 @@ function mapInit() {
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
     });
-    L.marker([38.8813513, -77.1160333],{icon: greenIcon}).addTo(map);
+    L.marker(latlon,{icon: greenIcon}).addTo(map);
     console.log(map);
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
     MQ.trafficLayer().addTo(map);

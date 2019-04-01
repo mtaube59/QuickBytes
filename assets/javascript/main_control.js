@@ -9,8 +9,8 @@ $(document).ready(function () {
     var lon = getLon();
 
     // Call restaurant type functions.
-    getCuisines(lat, lon);
-    getEstablishments(lat, lon);
+    // getCuisines(lat, lon);
+    // getEstablishments(lat, lon);
 
     var radius_meters = getRadiusMeters();
     getRestaurantData(lat, lon, radius_meters);
