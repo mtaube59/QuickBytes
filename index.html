@@ -39,15 +39,33 @@
       <div class="col col-lg-12">
         <div class="jumbotron jumbotron-fluid">
           <div class="container">
-            <h1 class="display-4">QUICKBYTES
-              <p class="lead">You should'nt make decisions when your hangry. Type your location and we'll show you all
-                of the quickest, good food spots near you.</p>
+            <img id="logo" src="./assets/images/twitter_header_photo_2.png">
+            <p class="lead">You should'nt make decisions when your hangry.<br> Type your location and we'll show you all
+              of the quickest, good food spots near you.</p>
           </div>
         </div>
       </div>
     </div>
     <div>
     </div>
+    <form>
+      <div class="form-row">
+        <div class="col-5">
+          <input type="text" class="form-control" id="address" placeholder="Address">
+        </div>
+        <div class="col-2">
+          <input type="text" class="form-control" id="city" placeholder="City">
+        </div>
+        <div class="col-2">
+          <input type="text" class="form-control" id="state" placeholder="State">
+        </div>
+        <div class="col-2">
+          <input type="text" class="form-control" id="zip" placeholder="Zip">
+        </div class="col-1">
+        <button type="button" class="btn btn-success">Bytes</button>
+      </div>
+    </form>
+    <br>
     <div id="map"></div>
     <table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
       <thead>
@@ -68,6 +86,9 @@
   </div>
   <br>
   </div>
+  <br>
+
+
   <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
     integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
     crossorigin=""></script>
@@ -83,7 +104,9 @@
   <script src="./assets/javascript/data_builders.js"></script>
   <script src="./assets/javascript/data_presenters.js"></script>
   <script src="./assets/javascript/main_control.js"></script>
-
+  <!-- <div class="footer navbar-fixed-bottom">
+      <p>About Quickbytes</p>
+  </div> -->
 </body>
 
 </html>

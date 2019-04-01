@@ -1,5 +1,6 @@
 function mapInit() {
-    map = L.map('map', { center: [38.8813513, -77.1160333], zoom: 17 });
+    latlon = [38.8813513, -77.1160333]
+    map = L.map('map', { center: latlon, zoom: 17 });
     //code from https://github.com/pointhi/leaflet-color-markers
     var greenIcon = new L.Icon({
         iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
