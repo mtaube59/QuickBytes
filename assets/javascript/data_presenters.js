@@ -46,51 +46,21 @@ function insertRow(idx) {
 
     console.log("name : " + name);
     // Create the new row
-    var newRow = $("<tr>").append(
-        $("<td>").text(name),
-        $("<td>").text(rating),
-        $("<td>").text(votes),
-        $("<td>").text(drive_time),
-        $("<td>").text(walk_time)
-    );
-
-    // Append the new row to the table
-    $("#my-table-body").append(newRow);
-
-}
-
-
-// Update the table.
-function updateTestTable() {
-
-    console.log("UPDATE TEST TABLE : ");
-    console.log(restaurantData.results.length);
-
-    $("#my-table-body").html("");
-    for (var i = 0; i < restaurantData.results.length; i++) {
-        var place = restaurantData.results[i];
-        insertRow(place);
+    var newRow = $("<tr>");
+    // Highlight fastest walk in green.
+    if (restaurantData.getPlaceIsQuickestWalk(idx) == true) {
+        newRow = $("<tr style=\"color: #40bf40\">");
     }
-}
 
-// Insert an entry to a row in the table.
-function insertTestRow(place) {
+    // Highlight fastest drive in red.
+    if (restaurantData.getPlaceIsQuickestDrive(idx) == true) {
+        newRow = $("<tr style=\"color: #ff0000\">");
+    }
 
-    var name = place.name;
-    var rating = place.rating;
-    var votes = place.votes;
-    var latitude = place.latitude;
-    var longitude = place.longitude;
-    var drive_time = place.drive_time;
-    var walk_time = place.walk_time;
-
-    // Create the new row
-    var newRow = $("<tr>").append(
+    newRow.append(
         $("<td>").text(name),
         $("<td>").text(rating),
         $("<td>").text(votes),
-        $("<td>").text(latitude),
-        $("<td>").text(longitude),
         $("<td>").text(drive_time),
         $("<td>").text(walk_time)
     );
