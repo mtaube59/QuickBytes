@@ -27,7 +27,9 @@ function updateTable() {
     console.log("updateTable : ");
     console.log(restaurantData);
     for (var i = 0; i < restaurantData.getResultsLength(); i++) {
-        insertRow(i);
+        if (restaurantData.getPlaceIsDataValid(i)) {
+            insertRow(i);
+        }
     }
 }
 

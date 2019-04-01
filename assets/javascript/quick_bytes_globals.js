@@ -235,6 +235,15 @@ var restaurantData = {
         }
     },
 
+    getPlaceIsDataValid: function (idx) {
+        if (idx < this.results.length) {
+            return this.results[idx].is_data_valid;
+        }
+        else {
+            return null;
+        }
+    },
+
     // Setters.
     setOriginLat: function (x) {
         this.lat = x;
@@ -437,6 +446,15 @@ var restaurantData = {
         }
     },
 
+    setPlaceIsDataValid: function (idx, x) {
+        if (idx < this.results.length) {
+            this.results[idx].is_data_valid = x;
+        }
+        else {
+            console.log("Index " + idx + " does not exist.");
+        }
+    },
+
     // Mark the quickest driving and walking destinations.
     markQuickest: function () {
 
@@ -446,22 +464,23 @@ var restaurantData = {
         var quickest_walk_idx = -1;
         var quickest_walk_time = -1;
         for (var i = 0; i < this.getResultsLength(); i++) {
-
-            if (i == 0) {
-                quickest_drive_idx = i;
-                quickest_walk_idx = i;
-                quickest_drive_time = this.getPlaceDriveTimeS(i);
-                quickest_walk_time = this.getPlaceWalkTimeS(i);
-            }
-            else {
-                if (this.getPlaceDriveTimeS(i) < quickest_drive_time) {
+            if (this.getPlaceIsDataValid(i)) {
+                if (quickest_drive_idx==-1) {
                     quickest_drive_idx = i;
-                    quickest_drive_time = this.getPlaceDriveTimeS(i);
-                }
-
-                if (this.getPlaceWalkTimeS(i) < quickest_walk_time) {
                     quickest_walk_idx = i;
+                    quickest_drive_time = this.getPlaceDriveTimeS(i);
                     quickest_walk_time = this.getPlaceWalkTimeS(i);
+                }
+                else {
+                    if (this.getPlaceDriveTimeS(i) < quickest_drive_time) {
+                        quickest_drive_idx = i;
+                        quickest_drive_time = this.getPlaceDriveTimeS(i);
+                    }
+
+                    if (this.getPlaceWalkTimeS(i) < quickest_walk_time) {
+                        quickest_walk_idx = i;
+                        quickest_walk_time = this.getPlaceWalkTimeS(i);
+                    }
                 }
             }
         }
@@ -523,6 +542,24 @@ var restaurantData = {
         }
 
         return all_done;
+    },
+
+    // Check validity of data and mark it.
+    checkPlaceIsDataValid: function (idx) {
+        if (idx < this.results.length) {
+            if ((this.results[idx].drive_time != -1) &&
+                (this.results[idx].walk_time != -1) &&
+                (this.results[idx].drive_time_s != -1) &&
+                (this.results[idx].walk_time_s != -1)) {
+                this.results[idx].is_data_valid = true;
+            }
+            else {
+                this.results[idx].is_data_valid = false;
+            }
+        }
+        else {
+            console.log("Index " + idx + " does not exist.");
+        }
     }
 
 };

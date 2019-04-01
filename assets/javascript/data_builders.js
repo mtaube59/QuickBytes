@@ -106,7 +106,8 @@ function getRestaurantData(lat, lon, radius_meters) {
                     traffic_data_request: null,
                     walk_data_request: null,
                     traffic_data_request_returned: false,
-                    walk_data_request_returned: false
+                    walk_data_request_returned: false,
+                    is_data_valid: false
 
                 }
 
@@ -211,6 +212,7 @@ function getTrafficData(idx) {
             var i = restaurantData.findTrafficDataRequest(request);
             if (i != null) {
                 restaurantData.setPlaceTrafficDataRequestReturned(i, true);
+                restaurantData.checkPlaceIsDataValid(i);
             }
             // NOTE : Either drive or walk results could return first, so put the check in both places.
             if (restaurantData.allTrafficDataRequestsDone() && restaurantData.allWalkDataRequestsDone()) {
@@ -290,6 +292,7 @@ function getWalkData(idx) {
             var i = restaurantData.findWalkDataRequest(request);
             if (i != null) {
                 restaurantData.setPlaceWalkDataRequestReturned(i, true);
+                restaurantData.checkPlaceIsDataValid(i);
             }
             // NOTE : Either drive or walk results could return first, so put the check in both places.
             if (restaurantData.allTrafficDataRequestsDone() && restaurantData.allWalkDataRequestsDone()) {
@@ -325,6 +328,7 @@ function getTestTrafficData() {
         restaurantData.setPlaceDrivingDirections(i, directions_text_arr);
 
         restaurantData.setPlaceTrafficDataRequestReturned(i, true);
+        restaurantData.checkPlaceIsDataValid(i);
     }
 
     // Set the done flag if possible.
@@ -357,6 +361,7 @@ function getTestWalkData() {
         restaurantData.setPlaceWalkingDirections(i, directions_text_arr);
 
         restaurantData.setPlaceWalkDataRequestReturned(i, true);
+        restaurantData.checkPlaceIsDataValid(i);
 
     }
 
