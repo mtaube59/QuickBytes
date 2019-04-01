@@ -9,7 +9,7 @@ function mapInit() {
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
     });
-    L.marker(latlon,{icon: greenIcon}).addTo(map);
+    L.marker(latlon, { icon: greenIcon }).addTo(map);
     console.log(map);
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
     MQ.trafficLayer().addTo(map);
@@ -32,7 +32,7 @@ function renderMap() {
     }
     console.log(markers);
 
-
+    var markarr = [];
     //code from https://harrywood.co.uk/maps/examples/leaflet/marker-array.view.html
     for (var i = 0; i < markers.length; i++) {
 
@@ -43,12 +43,13 @@ function renderMap() {
         var markerLocation = new L.LatLng(lat, lon);
         var marker = new L.Marker(markerLocation);
         map.addLayer(marker);
-
+        markarr.push(marker)
         marker.bindPopup(popupText);
 
     }
+    var group = new L.featureGroup(markarr);
 
-
+    map.fitBounds(group.getBounds().pad(0.25));
     $("#map").append(map)
 }
 mapInit()
