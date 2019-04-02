@@ -208,3 +208,9 @@ padding-left: 35px;
   text-decoration: none;
   cursor: pointer;
 }
+#walk {
+  color: #990099;
+}
+#drive {
+  color: #ff0000;
+}
