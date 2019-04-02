@@ -80,8 +80,24 @@ h1 {
     height: 350px;
 }
 h2 {
-    color: #E2DCD5;
+    color: whitesmoke;
 }
 h3 {
-    color: #E2DCD5;
+    color: whitesmoke;
+}
+p {
+    color: whitesmoke;
+}
+#matt {
+    width: 300px;
+    height: 350px;
+}
+#sharmila {
+    width: 350px;
+    height: 350px;
+
+}
+#jared {
+    width: 300px;
+    height: 350px;
 }

@@ -146,6 +146,12 @@ footer {
   height: 50px;
   
 }
-#footerText {
-  padding-top: 10px;
+footer {
+  padding-top: 20px;
+}
+.form-row{
+padding-left: 35px;
+}
+:any-link {
+  color: grey;
 }
