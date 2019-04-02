@@ -156,7 +156,7 @@ function getTrafficData(idx) {
     var to_lat = restaurantData.getPlaceLatitude(idx);
     var to_lon = restaurantData.getPlaceLongitude(idx);
 
-    var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
+    var queryURL = "https://www.mapquestapi.com/directions/v2/route?" +
         "key=" + MAPQUEST_API_KEY +
         "&from=" + from_lat + "," + from_lon +
         "&to=" + to_lat + "," + to_lon +
@@ -237,7 +237,7 @@ function getWalkData(idx) {
     var to_lat = restaurantData.getPlaceLatitude(idx);
     var to_lon = restaurantData.getPlaceLongitude(idx);
 
-    var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
+    var queryURL = "https://www.mapquestapi.com/directions/v2/route?" +
         "key=" + MAPQUEST_API_KEY +
         "&from=" + from_lat + "," + from_lon +
         "&to=" + to_lat + "," + to_lon +

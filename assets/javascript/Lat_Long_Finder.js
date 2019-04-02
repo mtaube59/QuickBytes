@@ -12,11 +12,13 @@ var state = $("#state").val();
 
 var zip = $("#zip").val();
 
-queryURL = "http://www.mapquestapi.com/geocoding/v1/address?key=34ltZ5o9YYYglKuCjJJAiFRMgsCYCWc1&location=" + address + "," + city + "," + state + "," + zip;
+queryURL = "https://www.mapquestapi.com/geocoding/v1/address?key=34ltZ5o9YYYglKuCjJJAiFRMgsCYCWc1&location=" + address + "," + city + "," + state + "," + zip;
+
+console.log(queryURL);
 
 $("#address").val("");
 $("#city").val("");
-$("#state").val("");
+$("#state").val("State");
 $("#zip").val("");
 
 function getLatLong() {
