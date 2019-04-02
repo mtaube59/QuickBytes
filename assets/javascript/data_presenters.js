@@ -24,74 +24,94 @@ function getRadiusMeters() {
 
 // Update the table.
 function updateTable() {
-
-    console.log("UPDATE TEST TABLE : ");
-    console.log(restaurantData.results.length);
+    console.log("updateTable : ");
+    console.log(restaurantData);
 
     $("#my-table-body").html("");
-    for (var i = 0; i < restaurantData.results.length; i++) {
-        var place = restaurantData.results[i];
-        insertRow(place);
+    for (var i = 0; i < restaurantData.getResultsLength(); i++) {
+        if (restaurantData.getPlaceIsDataValid(i)) {
+            insertRow(i);
+        }
     }
+
+    $("#my-table-body tr").on("click", function (event) {
+
+        console.log("row clicked");
+        console.log($(this));
+        var id = parseInt($(this).attr("id"));
+        console.log("id = " + id);
+
+
+        // Set the info on the modal based on which result was clicked.
+        $("#modal-card-title").text(restaurantData.getPlaceName(id));
+        if (restaurantData.getPlaceCuisines(id) != "") {
+            $("#cuisine-text").text("Cuisine : " + restaurantData.getPlaceCuisines(id));
+        }
+        if (restaurantData.getPlaceRatingText(id) != "") {
+            $("#rating-text").text("Rating : " + restaurantData.getPlaceRatingText(id));
+        }
+        $("#price-text").text("Price : " + restaurantData.getPlacePriceRange(id));
+        // Menu link
+        var menu = restaurantData.getPlaceMenuURL(id);
+        if (menu != null && menu != "") {
+            $("#menu-text").text("MENU");
+            $("#menu-text").attr("href",menu);
+            
+        }
+
+
+        // Get driving directions.
+        var driving_dirs = restaurantData.getPlaceDrivingDirections(id);
+        var html_str = "";
+        for (var i = 0; i < driving_dirs.length; i++) {
+            html_str += "<p>" + driving_dirs[i] + "</p>";
+        }
+        $("#directions-text2").html(html_str);
+
+        // Get walking directions.
+        var walking_dirs = restaurantData.getPlaceWalkingDirections(id);
+        var html_str = "";
+        for (var i = 0; i < walking_dirs.length; i++) {
+            html_str += "<p>" + walking_dirs[i] + "</p>";
+        }
+        $("#directions-text3").html(html_str);
+
+        var myModal = document.getElementById('myModal');
+        myModal.style.display = "block";
+
+    });
 }
 
 // Insert an entry to a row in the table.
-function insertRow(place) {
+function insertRow(idx) {
 
-    var name = place.name;
-    var rating = place.rating;
-    var votes = place.votes;
-    var drive_time = place.drive_time;
-    var walk_time = place.walk_time;
+    var name = restaurantData.getPlaceName(idx);
+    var rating = restaurantData.getPlaceRating(idx);
+    var votes = restaurantData.getPlaceVotes(idx);
+    var drive_time = restaurantData.getPlaceDriveTime(idx);
+    var walk_time = restaurantData.getPlaceWalkTime(idx);
 
     console.log("name : " + name);
 
+    var rowName = "" + idx;
     // Create the new row
-    var newRow = $("<tr>").append(
-        $("<td>").text(name),
-        $("<td>").text(rating),
-        $("<td>").text(votes),
-        $("<td>").text(drive_time),
-        $("<td>").text(walk_time)
-    );
-
-    // Append the new row to the table
-    $("#my-table-body").append(newRow);
-
-}
-
-
-// Update the table.
-function updateTestTable() {
-
-    console.log("UPDATE TEST TABLE : ");
-    console.log(restaurantData.results.length);
-
-    $("#my-table-body").html("");
-    for (var i = 0; i < restaurantData.results.length; i++) {
-        var place = restaurantData.results[i];
-        insertRow(place);
+    var newRow = $("<tr>");
+    newRow.attr("id", rowName);
+    // Highlight fastest walk in green.
+    if (restaurantData.getPlaceIsQuickestWalk(idx) == true) {
+        // newRow.attr("style", "color: #40bf40");
+        newRow.attr("style", "color: #990099;font-weight: bold");
     }
-}
 
-// Insert an entry to a row in the table.
-function insertTestRow(place) {
+    // Highlight fastest drive in red.
+    if (restaurantData.getPlaceIsQuickestDrive(idx) == true) {
+        newRow.attr("style", "color: #ff0000;font-weight: bold");
+    }
 
-    var name = place.name;
-    var rating = place.rating;
-    var votes = place.votes;
-    var latitude = place.latitude;
-    var longitude = place.longitude;
-    var drive_time = place.drive_time;
-    var walk_time = place.walk_time;
-
-    // Create the new row
-    var newRow = $("<tr>").append(
+    newRow.append(
         $("<td>").text(name),
         $("<td>").text(rating),
         $("<td>").text(votes),
-        $("<td>").text(latitude),
-        $("<td>").text(longitude),
         $("<td>").text(drive_time),
         $("<td>").text(walk_time)
     );
