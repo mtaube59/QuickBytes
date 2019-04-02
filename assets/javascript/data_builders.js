@@ -157,7 +157,7 @@ function getRestaurantData(lat, lon, radius_meters) {
 }
 
 function getTrafficData2(lat_lon_matrix) {
-    var queryURL = "http://www.mapquestapi.com/directions/v2/routematrix?" +
+    var queryURL = "https://www.mapquestapi.com/directions/v2/routematrix?" +
         "key=" + MAPQUEST_API_KEY;
 
     console.log(queryURL);
@@ -193,7 +193,7 @@ function getTrafficData2(lat_lon_matrix) {
 
 function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
 
-    var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
+    var queryURL = "https://www.mapquestapi.com/directions/v2/route?" +
         "key=" + MAPQUEST_API_KEY +
         "&from=" + from_lat + "," + from_lon +
         "&to=" + to_lat + "," + to_lon +
@@ -250,7 +250,7 @@ function getTrafficData(from_lat, from_lon, to_lat, to_lon) {
 
 function getWalkData(from_lat, from_lon, to_lat, to_lon) {
 
-    var queryURL = "http://www.mapquestapi.com/directions/v2/route?" +
+    var queryURL = "https://www.mapquestapi.com/directions/v2/route?" +
         "key=" + MAPQUEST_API_KEY +
         "&from=" + from_lat + "," + from_lon +
         "&to=" + to_lat + "," + to_lon +
