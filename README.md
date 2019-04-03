@@ -1,5 +1,6 @@
+![big logo](https://user-images.githubusercontent.com/48193577/55451606-a81bca80-55a1-11e9-8560-6b8be56e895c.png)
 # QuickBytes
-You shouldn't make decisions when you're "hangry". Type your location and we'll show you all
+You shouldn't make decisions when you're "hangry". Type your location and we'll show you all the quickest, good food spots near you!
 
 ## Team Members
 - [Sharmila](https://github.com/SydPRetzel/) 
@@ -8,17 +9,17 @@ You shouldn't make decisions when you're "hangry". Type your location and we'll 
 - [Mattew Taube](https://github.com/mtaube59/) 
 
 ## GitHub Demos
-- [Click here to see our website in action.](The link goes in here)
-- [Click here to see creating databases in action.] (What you guys think)
-
+- [Click here to see our website in action.](https://sydpretzel.github.io/QuickBytes/)
 ## Technologies Used
 - [x] Bootstrap, CSS 
 
 - [x] JQuery
 
-- [x] APIs
+- [x] Leaflet
 
-## API Demos
-(Maybe we can put our API Demos on here?)
+- [x] Mapquest
+
+- [x] Zomato APIs
+
 ## Sketches
-(the main page design what i drew using pencil app)
+(https://github.com/SydPRetzel/QuickBytes/blob/master/resources/Main%20Page.pdf)
