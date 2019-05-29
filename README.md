@@ -9,7 +9,7 @@ You shouldn't make decisions when you're "hangry". Type your location and we'll 
 - [Mattew Taube](https://github.com/mtaube59/) 
 
 ## GitHub Demos
-- [Click here to see our website in action.](https://sydpretzel.github.io/QuickBytes/)
+- [Click here to see our website in action.](https://mtaube59.github.io/QuickBytes/)
 ## Technologies Used
 - [x] Bootstrap, CSS 
 
